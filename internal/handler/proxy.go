@@ -22,6 +22,23 @@ type proxy struct {
 }
 
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	r2, err := http.NewRequest("POST", "/auth/getToken", nil)
+	authSrv, err := p.getService(r2)
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+
+	if len(authSrv) == 0 {
+		w.WriteHeader(404)
+		return
+	}
+
+	_, err = http.Post(authSrv, "", nil)
+	if err != nil {
+		w.WriteHeader(401)
+	}
+
 	service, err := p.getService(r)
 	if err != nil {
 		w.WriteHeader(500)
